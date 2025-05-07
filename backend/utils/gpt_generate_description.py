@@ -7,7 +7,7 @@ from models import ChatRequest
 load_dotenv()
 API_URL = "https://api.openai.com/v1/chat/completions"
 # API_KEY = os.getenv("OPENAI_API_KEY")
-API_KEY = "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"
+API_KEY = "_____"
 
 
 async def generate_description(data: ChatRequest) -> str:
