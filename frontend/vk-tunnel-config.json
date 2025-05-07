@@ -1,0 +1,11 @@
+{
+    "app_id": 53519220,
+    "endpoints": [
+        "mobile",
+        "mvk",
+        "web"
+    ],
+    "port": "3000",
+    "http-protocol": "http",
+    "insecure": "0"
+}

@@ -1,0 +1,43 @@
+version: '3.9'
+
+services:
+  backend:
+    container_name: vk_chatgpt_backend
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    env_file: .env
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+    environment:
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+    volumes:
+      # Монтируем реальные PEM-файлы из archive (обход сим-линков)
+      - /etc/letsencrypt/archive/xn-----dlccdmca1acd3bode5aey.xn--p1ai/fullchain1.pem:/certs/fullchain.pem:ro
+      - /etc/letsencrypt/archive/xn-----dlccdmca1acd3bode5aey.xn--p1ai/privkey1.pem:/certs/privkey.pem:ro
+
+  frontend:
+    container_name: vk_chatgpt_frontend
+    build: ./frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: vk_chatgpt_postgres
+    env_file: .env
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:

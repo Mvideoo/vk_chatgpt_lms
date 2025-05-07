@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+python-dotenv
+openai
+sqlalchemy
+asyncpg
+pillow
+aiohttp==3.11.18
+flask-cors
+greenlet

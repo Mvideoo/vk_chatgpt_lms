@@ -1,0 +1,43 @@
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.theme {
+  padding-top: var(--safe-area-inset-top);
+  padding-bottom: var(--safe-area-inset-bottom);
+}
+
+.loader {
+  border: 6px solid #e0e0e0;
+  border-top: 6px solid #30663d;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+.scroll-container {
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+:root {
+  --vh: 1vh;
+  --safe-area-inset-top: 0px;
+  --default-safe-area-inset-bottom: 32px;
+  --safe-area-inset-bottom: var(--default-safe-area-inset-bottom);
+}
+.chat-container {
+  height: calc(var(--vh, 1vh) * 100);
+}
