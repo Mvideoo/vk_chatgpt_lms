@@ -1,43 +1,57 @@
+/* Базовые стили для html, body и корневого элемента */
+/* Обеспечивают полноэкранное отображение без отступов */
 html,
 body,
 #root {
-  height: 100%;
-  margin: 0;
-  padding: 0;
+  height: 100%; /* Занимает всю высоту viewport */
+  margin: 0;    /* Убирает внешние отступы */
+  padding: 0;   /* Убирает внутренние отступы */
 }
 
+/* Основной класс для темы приложения */
+/* Учитывает безопасные зоны на мобильных устройствах */
 .theme {
-  padding-top: var(--safe-area-inset-top);
-  padding-bottom: var(--safe-area-inset-bottom);
+  padding-top: var(--safe-area-inset-top);     /* Отступ сверху с учетом "выреза" экрана */
+  padding-bottom: var(--safe-area-inset-bottom); /* Отступ снизу с учетом "выреза" экрана */
 }
 
+/* Стили для индикатора загрузки (лоадера) */
 .loader {
-  border: 6px solid #e0e0e0;
-  border-top: 6px solid #30663d;
-  border-radius: 50%;
-  width: 60px;
-  height: 60px;
-  animation: spin 1s linear infinite;
+  border: 6px solid #e0e0e0;       /* Серая часть круга */
+  border-top: 6px solid #30663d;   /* Зеленая анимируемая часть */
+  border-radius: 50%;              /* Делает элемент круглым */
+  width: 60px;                     /* Ширина круга */
+  height: 60px;                    /* Высота круга */
+  animation: spin 1s linear infinite; /* Анимация вращения */
 }
 
+/* Анимация вращения для лоадера */
 @keyframes spin {
   0% {
-    transform: rotate(0deg);
+    transform: rotate(0deg);   /* Начальное положение - 0 градусов */
   }
   100% {
-    transform: rotate(360deg);
+    transform: rotate(360deg); /* Конечное положение - полный оборот */
   }
 }
+
+/* Класс для контейнеров с прокруткой */
 .scroll-container {
-  overflow-x: hidden;
-  overflow-y: auto;
+  overflow-x: hidden;  /* Отключает горизонтальную прокрутку */
+  overflow-y: auto;    /* Включает вертикальную прокрутку при необходимости */
 }
+
+/* CSS-переменные для динамических значений */
 :root {
-  --vh: 1vh;
-  --safe-area-inset-top: 0px;
-  --default-safe-area-inset-bottom: 32px;
-  --safe-area-inset-bottom: var(--default-safe-area-inset-bottom);
+  --vh: 1vh;  /* Базовая единица высоты viewport */
+  
+  /* Переменные для безопасных зон (особенно важно для iPhone с "челкой") */
+  --safe-area-inset-top: 0px;  /* Отступ сверху по умолчанию */
+  --default-safe-area-inset-bottom: 32px; /* Стандартный отступ снизу */
+  --safe-area-inset-bottom: var(--default-safe-area-inset-bottom); /* Текущий отступ снизу */
 }
+
+/* Класс для контейнера чата с динамической высотой */
 .chat-container {
-  height: calc(var(--vh, 1vh) * 100);
+  height: calc(var(--vh, 1vh) * 100); /* Занимает 100% высоты viewport */
 }
