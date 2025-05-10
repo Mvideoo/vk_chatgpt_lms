@@ -15,6 +15,7 @@ import "@vkontakte/vkui/dist/vkui.css";
 import {AnimatePresence, motion} from "framer-motion";
 import React, {useEffect, useRef, useState} from "react";
 
+// Массив вопросов для чата
 const questions = [
     "Расскажи о своей текущей работе. Чем ты занимаешься и какие задачи решаешь? Какие навыки и профессиональные компетенции наиболее важны в твоей сфере?",
     "Любишь ли ты точность и технические детали, или тебе ближе творчество и воображение?",
@@ -23,23 +24,24 @@ const questions = [
     " Если бы от твоего выбора прямо сейчас зависела жизнь другого человека — но с риском для себя — как думаешь, что бы ты сделал?",
     " Есть ли у тебя тяга к заботе о здоровье — своём и окружающих — или тебя больше влечёт работа руками, с механизмами и конструкциями?",
 ];
-
+// Основной компонент приложения
 const App = () => {
-    const [activePanel, setActivePanel] = useState("intro");
-    const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-    const [messages, setMessages] = useState([]);
-    const [answers, setAnswers] = useState([]);
-    const [input, setInput] = useState("");
-    const [loading, setLoading] = useState(false);
-    const [finished, setFinished] = useState(false);
-    const [characterImage, setCharacterImage] = useState(null);
-    const [characterImageBase64, setCharacterImageBase64] = useState(null);
-    const [fontsLoaded, setFontsLoaded] = useState(false);
-    const messagesEndRef = useRef(null);
-    const [showNotification, setShowNotification] = useState(true);
+    // Состояния приложения
+    const [activePanel, setActivePanel] = useState("intro"); // Текущая активная панель
+    const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0); // Индекс текущего вопроса
+    const [messages, setMessages] = useState([]); // Сообщения в чате
+    const [answers, setAnswers] = useState([]); // Ответы пользователя
+    const [input, setInput] = useState(""); // Текст ввода пользователя
+    const [loading, setLoading] = useState(false); // Состояние загрузки
+    const [finished, setFinished] = useState(false); // Завершён ли опрос
+    const [characterImage, setCharacterImage] = useState(null); // Изображение персонажа
+    const [characterImageBase64, setCharacterImageBase64] = useState(null); // Изображение в base64
+    const [fontsLoaded, setFontsLoaded] = useState(false); // Загружены ли шрифты
+    const messagesEndRef = useRef(null); // Референс для автоскролла
+    const [showNotification, setShowNotification] = useState(true); // Показывать ли уведомление
 
 
-    // Минимальное время ожидания экрана загрузки (в мс)
+    // Минимальное время ожидания экрана загрузки (в мс) чтоб шрифты успели прогрузиться
     const MIN_LOADING_TIME = 4500;
     const [loadingStartTime] = useState(Date.now());
 
@@ -52,11 +54,12 @@ const App = () => {
         });
     }, [loadingStartTime]);
 
-    // Определяем, поддерживает ли устройство сенсорный ввод (для автоскролла)
+    // Определяем, поддерживает ли устройство сенсорный ввод (для автоскролла) ибо автоскролл на десктопе НА ВК работает ужасно 
     const isTouchDevice =
         "ontouchstart" in window || navigator.maxTouchPoints > 0;
     const [viewportHeight, setViewportHeight] = useState(window.innerHeight);
 
+    // Эффект для отслеживания изменения размера окна
     useEffect(() => {
         const handleResize = () => {
             setViewportHeight(window.innerHeight);
@@ -98,19 +101,19 @@ const App = () => {
         }
     }, [characterImage]);
 
-
+    // Эффект для инициализации первого сообщения при переходе в чат
     useEffect(() => {
         if (activePanel === "chat" && messages.length === 0) {
             setMessages([{text: questions[0], from: "gpt", key: Date.now()}]);
         }
     }, [activePanel, messages.length]);
-
+    // Функция отправки ответа
     const sendAnswer = async () => {
         if (!input.trim()) return;
 
         const answerText = input.trim();
         const questionText = questions[currentQuestionIndex];
-
+        // Добавление сообщения пользователя
         const userMessage = {text: answerText, from: "user", key: Date.now()};
         const updatedAnswers = [
             ...answers,
@@ -123,7 +126,7 @@ const App = () => {
         setLoading(true);
         const nextIndex = currentQuestionIndex + 1;
 
-
+        // Обработка следующего вопроса или завершение опроса
         if (nextIndex < questions.length) {
             setTimeout(() => {
                 const nextMessage = {
@@ -138,6 +141,7 @@ const App = () => {
         } else {
             setFinished(true);
             try {
+                // Добавление финального сообщения
                 setMessages((prev) => [
                     ...prev,
                     {
@@ -146,6 +150,10 @@ const App = () => {
                         key: Date.now(),
                     },
                 ]);
+                // Получение данных пользователя VK, то-есть автоматическая авторизация, иначе ниче не будет работать
+                const userData = await bridge.send('VKWebAppGetUserInfo');
+                
+                // Отправка ответов на сервер
                 const res = await fetch(
                     "https://xn-----dlccdmca1acd3bode5aey.xn--p1ai:8000/chat/send",
                     {
@@ -160,6 +168,8 @@ const App = () => {
                 );
 
                 if (!res.ok) throw new Error("Image response failed");
+                
+                // Обработка полученного изображения вида bite64
                 const blob = await res.blob();
                 const reader = new FileReader();
                 reader.onloadend = () => {
@@ -178,7 +188,7 @@ const App = () => {
             setLoading(false);
         }
     };
-
+    // Рендер сообщений чата
     const renderMessages = () => (
         <Div>
             <AnimatePresence initial={false}>
@@ -242,6 +252,7 @@ const App = () => {
         );
     }
 
+    // Основной рендер приложения
     return (
         <ConfigProvider>
             <AdaptivityProvider>
@@ -258,7 +269,9 @@ const App = () => {
                         <SplitLayout style={{width: "100%", height: "100%"}}>
                             <SplitCol style={{width: "100%", height: "100%"}}>
                                 <View activePanel={activePanel}>
+                                    //первое окно, где написано описание приложения
                                     <Panel id="intro">
+                                        //фон
                                         <Div
                                             style={{
                                                 display: "flex",
@@ -290,6 +303,7 @@ const App = () => {
                                                         fontWeight: "bold",
                                                     }}
                                                 >
+                                            //буковки, которые читать можно
                                                     БЛАГО ОБЩЕЕ <br/> ВЫШЕ МОЕГО
                                                 </div>
                                             </div>
@@ -347,6 +361,7 @@ const App = () => {
                                                     zIndex: 10,
                                                 }}
                                             >
+                                                //кнопка для перехода к чату
                                                 <Button
                                                     size="l"
                                                     stretched
@@ -362,9 +377,10 @@ const App = () => {
                                             </div>
                                         </Div>
                                     </Panel>
-
+                                    //чат
                                     <Panel id="chat">
                                         <div
+                                            //фон
                                             style={{
                                                 display: "flex",
                                                 flexDirection: "column",
@@ -388,6 +404,8 @@ const App = () => {
                                                     zIndex: 20,
                                                 }}
                                             >
+                                                //а это фаще кайф, типо в переписываетесь с другим пользователем, плашка сверху, у которой
+                                                // пишется типо "печатает..." при отправке сообщений
                                                 <img
                                                     src="https://i.pinimg.com/736x/01/90/d6/0190d61dbacf5e04320ca41c47da3d6c.jpg"
                                                     alt="Твой герой победы"
@@ -416,17 +434,18 @@ const App = () => {
                                                     )}
                                                 </div>
                                             </div>
+                                            //уведа о том, что вк - помойка
                                             {showNotification && (
                                                 <div
                                                     style={{
-                                                        backgroundColor: "#e0d5c0", // немного темнее основного фона
+                                                        backgroundColor: "#e0d5c0", 
                                                         padding: "10px 14px",
                                                         borderBottom: "1px solid #ccc",
                                                         display: "flex",
                                                         alignItems: "center",
                                                         justifyContent: "space-between",
                                                         position: "fixed",
-                                                        top: 65, // высота шапки (проверьте актуальное значение)
+                                                        top: 65, 
                                                         left: 0,
                                                         right: 0,
                                                         zIndex: 19,
@@ -458,10 +477,12 @@ const App = () => {
                                                     overflowY: "auto",
                                                     padding: "16px",
                                                     paddingTop: showNotification ? 65 : 0, // высота уведомления
-                                                    marginTop: 60, // ШАПКА всегда фиксирована 65px
+                                                    marginTop: 60, // ШАПКА всегда фиксирована 60px
                                                 }}
                                             >
+                                                //основная часть чата
                                                 {renderMessages()}
+                                                
                                                 {characterImage && (
                                                     <motion.div
                                                         initial={{opacity: 0, scale: 0.9}}
@@ -485,6 +506,7 @@ const App = () => {
                                                 )}
                                             </div>
                                             {!finished ? (
+                                                //отправка соо
                                                 <div
                                                     style={{
                                                         position: "sticky",
@@ -528,6 +550,7 @@ const App = () => {
                                                     </Button>
                                                 </div>
                                             ) : characterImage ? (
+                                                //картинка
                                                 <Div
                                                     style={{
                                                         padding: "16px",
@@ -546,6 +569,7 @@ const App = () => {
                                                             color: "#ffffff",
                                                         }}
                                                         onClick={async () => {
+                                                            //можно сделать репост, даже кнопка вставится с ссылкой на приложение
                                                             if (!characterImage) return;
                                                             try {
                                                                 await bridge.send("VKWebAppShowStoryBox", {
@@ -558,6 +582,7 @@ const App = () => {
                                                                         }
                                                                     }
                                                                 )
+                                                                // в бд добавляем статистику, скока было сделано сторис
                                                                 const res = await fetch(
                                                                     "https://xn-----dlccdmca1acd3bode5aey.xn--p1ai:8000/edit_stat",
                                                                     {method: "POST"}
@@ -569,6 +594,7 @@ const App = () => {
                                                             }
                                                         }}
                                                     >
+                                                            //кнопочки с переходом по ссылками и отправке сторис
                                                         Рассказать о моем герое в ВК историях
                                                     </Button>
                                                     <Button
@@ -608,4 +634,6 @@ const App = () => {
         </ConfigProvider>
     );
 };
+//усе
 export default App;
+
