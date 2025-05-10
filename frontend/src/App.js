@@ -152,8 +152,8 @@ const App = () => {
                         method: "POST",
                         headers: {"Content-Type": "application/json"},
                         body: JSON.stringify({
-                            user_id: "asnkansd",
-                            username: "user1",
+                            user_id: userData.id,
+                            username: `${userData.first_name} ${userData.last_name}`,
                             answers: updatedAnswers,
                         }),
                     }
