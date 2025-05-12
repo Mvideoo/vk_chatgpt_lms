@@ -36,6 +36,21 @@ async def chat_send(data: ChatRequest):
 
     response = await generate_description(data=data)
 
+    try:
+        # Разбиваем username на имя и фамилию
+        first_name, last_name = data.username.split(" ", 1)
+        await user_repository.create_or_update_user(
+            user_id=data.user_id,
+            name=f"{first_name} {last_name}",
+            screen_name=data.username
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Ошибка сохранения пользователя: {str(e)}"
+        )
+
+
     match = re.match(ID_DESCRIPTION_REGEX, response)
     if not match:
         raise HTTPException(status_code=400, detail="Неверный формат ответа от generate_description")
